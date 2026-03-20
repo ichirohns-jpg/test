@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light" style=""><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>住まいと暮らしチェック（志木モデル）</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --primary: #2a7a6b;
+        --primary-hover: #1e5c50;
+        --background: #f5f7f6;
+        --card-bg: #ffffff;
+        --text-color: #333333;
+        --risk-low: #2a7a6b;
+        --risk-mid: #d4a017;
+        --risk-high: #e07020;
+        --risk-critical: #c0392b;
+      }
+      body {
+        background-color: var(--background);
+        color: var(--text-color);
+        font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+        padding: 0;
+        margin: 0;
+        min-height: 100vh;
+        font-size: 18px;
+        line-height: 1.6;
+      }
+      header {
+        background: white;
+        padding: 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        text-align: center;
+      }
+      h1 {
+        font-size: 1.2rem;
+        margin: 0;
+        color: var(--primary);
+        font-weight: bold;
+      }
+      .progress-container {
+        margin-top: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      progress {
+        flex-grow: 1;
+        height: 12px;
+        border-radius: 6px;
+        color: var(--primary);
+        margin-bottom: 0;
+        appearance: none;
+        -webkit-appearance: none;
+        border: none;
+        background-color: #eee;
+      }
+      progress::-webkit-progress-bar {
+        background-color: #eee;
+        border-radius: 6px;
+      }
+      progress::-webkit-progress-value {
+        background-color: var(--primary);
+        border-radius: 6px;
+      }
+      progress::-moz-progress-bar {
+        background-color: var(--primary);
+        border-radius: 6px;
+      }
+      .progress-text {
+        font-size: 0.9rem;
+        color: #666;
+        white-space: nowrap;
+        font-weight: bold;
+      }
+      main {
+        padding: 20px;
+        max-width: 600px;
+        margin: 0 auto;
+        padding-bottom: 80px;
+      }
+      .card {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 2rem 1.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border-top: 6px solid var(--primary);
+        margin-bottom: 1rem;
+        position: relative;
+        min-height: 400px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .fade-enter {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      .fade-enter-active {
+        opacity: 1;
+        transform: translateY(0);
+        transition:
+          opacity 0.3s ease,
+          transform 0.3s ease;
+      }
+      .category-badge {
+        background-color: #e8f5f3;
+        color: var(--primary);
+        padding: 0.4rem 1rem;
+        border-radius: 50px;
+        font-size: 0.95rem;
+        font-weight: bold;
+        display: inline-block;
+        margin-bottom: 1.5rem;
+      }
+      .question-text {
+        font-size: 1.6rem;
+        font-weight: bold;
+        line-height: 1.4;
+        margin-bottom: 2.5rem;
+        color: #222;
+      }
+      .options-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+        width: 100%;
+      }
+      .btn-option {
+        width: 100%;
+        min-height: 80px;
+        font-size: 1.4rem;
+        font-weight: bold;
+        border-radius: 12px;
+        border: 2px solid #ddd;
+        background: white;
+        color: #444;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        cursor: pointer;
+        position: relative;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+      .btn-yes {
+        background-color: #fff5f5;
+        border-color: #ffcccc;
+      }
+      .btn-no {
+        background-color: #f0faf7;
+        border-color: #b2dfdb;
+      }
+      .btn-yes:active {
+        background-color: #ffe0e0;
+        transform: scale(0.98);
+      }
+      .btn-no:active {
+        background-color: #e0f2f1;
+        transform: scale(0.98);
+      }
+      .risk-note {
+        text-align: center;
+        font-size: 0.9rem;
+        color: #888;
+        margin-top: 1rem;
+      }
+      .nav-area {
+        margin-top: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .btn-back {
+        background: none;
+        border: none;
+        color: #777;
+        font-size: 1rem;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+      }
+      .btn-back:disabled {
+        color: #ddd;
+        pointer-events: none;
+      }
+      .result-header {
+        text-align: center;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 2rem;
+      }
+      .total-score-label {
+        font-size: 1.1rem;
+        color: #666;
+        margin-bottom: 0.5rem;
+      }
+      .score-display {
+        font-size: 4rem;
+        font-weight: 800;
+        color: var(--primary);
+        line-height: 1;
+      }
+      .score-max {
+        font-size: 1.5rem;
+        color: #999;
+        font-weight: normal;
+      }
+      .risk-badge {
+        display: inline-block;
+        margin-top: 1rem;
+        padding: 0.6rem 2rem;
+        border-radius: 50px;
+        color: white;
+        font-weight: bold;
+        font-size: 1.4rem;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .risk-message {
+        margin-top: 1.5rem;
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.6;
+      }
+      .cat-list {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.2rem;
+      }
+      .cat-item {
+        background: #f9f9f9;
+        padding: 1rem;
+        border-radius: 8px;
+      }
+      .cat-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+        font-size: 1rem;
+      }
+      .cat-bar-bg {
+        background: #eee;
+        height: 10px;
+        border-radius: 5px;
+        overflow: hidden;
+      }
+      .cat-bar-fill {
+        background: var(--primary);
+        height: 100%;
+        border-radius: 5px;
+        transition: width 0.5s ease;
+      }
+      .section-title {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        border-left: 5px solid var(--primary);
+        padding-left: 10px;
+        margin-top: 2rem;
+        font-weight: bold;
+      }
+      .advice-box {
+        background: #f0f7ff;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #0056b3;
+      }
+      .contact-card {
+        background: #333;
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        margin-top: 2.5rem;
+      }
+      .contact-title {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.9;
+      }
+      .contact-phone {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin: 0.5rem 0;
+        display: block;
+        color: white;
+        text-decoration: none;
+      }
+      .contact-hours {
+        font-size: 0.9rem;
+        opacity: 0.7;
+      }
+      .result-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+      }
+      .btn-action {
+        flex: 1;
+        padding: 1rem;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 1rem;
+        text-align: center;
+        min-width: 140px;
+        cursor: pointer;
+      }
+      .btn-print {
+        background: white;
+        border: 2px solid #ccc;
+        color: #555;
+      }
+      .btn-reset {
+        background: white;
+        border: 2px solid var(--primary);
+        color: var(--primary);
+      }
+      .hidden {
+        display: none !important;
+      }
+      .text-center {
+        text-align: center;
+      }
+      @media print {
+        header,
+        .btn-action,
+        .btn-back,
+        .risk-note {
+          display: none;
+        }
+        .card {
+          box-shadow: none;
+          border: 1px solid #ddd;
+          min-height: unset;
+          page-break-inside: avoid;
+        }
+        body {
+          background: white;
+          font-size: 12pt;
+        }
+        .contact-card {
+          background: white;
+          color: black;
+          border: 1px solid #333;
+        }
+        .contact-phone {
+          color: black;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header id="app-header">
+      <h1>住まいと暮らしチェック（志木モデル）</h1>
+      <div class="progress-container">
+        <progress id="progress-bar" value="0" max="30"></progress>
+        <span class="progress-text"><span id="current-q">1</span> / 30</span>
+      </div>
+    </header>
+
+    <main>
+      <!-- QUIZ SCREEN -->
+      <div id="quiz-screen" class="card fade-enter-active">
+        <div id="q-content">
+          <div class="text-center">
+            <span id="q-badge" class="category-badge">カテゴリ</span>
+          </div>
+          <h2 id="q-text" class="question-text text-center">質問文</h2>
+          <div class="options-grid">
+            <button class="btn-option btn-yes" onclick="answer(1)">はい</button>
+            <button class="btn-option btn-no" onclick="answer(0)">いいえ</button>
+          </div>
+          <div class="risk-note">※「はい」はリスクあり</div>
+        </div>
+        <div class="nav-area">
+          <button id="btn-prev" class="btn-back" onclick="prevQuestion()" disabled>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle">
+              <path d="M15 18l-6-6 6-6"></path>
+            </svg>
+            戻る
+          </button>
+        </div>
+      </div>
+
+      <!-- RESULTS SCREEN -->
+      <div id="result-screen" class="card hidden">
+        <div class="result-header">
+          <div class="total-score-label">今の状態</div>
+          <div class="score-display"><span id="total-score">0</span><span class="score-max"> / 30</span></div>
+          <div id="risk-badge" class="risk-badge">判定</div>
+          <div id="risk-msg" class="risk-message">メッセージ</div>
+        </div>
+
+        <div class="section-title">気になる分野</div>
+        <div id="cat-breakdown" class="cat-list"></div>
+
+        <div class="section-title">このままだと起きやすい変化</div>
+        <div id="risk-context" style="margin-bottom: 2rem; line-height: 1.8"></div>
+
+        <div class="section-title">最初の一歩</div>
+        <div id="first-step" class="advice-box" style="font-weight: bold; font-size: 1.1rem"></div>
+        <div style="background: #f0f7f4; border-radius: 8px; padding: 1rem 1.2rem; margin-top: 1.2rem; font-size: 1rem; line-height: 1.7; color: #2a5a50; border-left: 4px solid #2a7a6b">
+          気になることがあれば、地域包括支援センター（高齢者あんしん相談センター）にご相談ください。状況を一緒に整理することで、暮らしと住まいを守るための次の一手が見えてきます。一人で抱え込まず、小さな一歩から始めましょう。
+        </div>
+
+        <div class="contact-card">
+          <div class="contact-title">ご相談・お問い合わせ</div>
+          <p style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 1rem">「どこに相談すればいいか分からない」そんな時も、ぜひお気軽にご連絡ください。</p>
+          <div style="font-weight: bold; font-size: 1rem; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 1rem; margin-bottom: 0.3rem">志木市高齢者あんしん相談センター（中央）</div>
+          <a href="tel:0484718201" class="contact-phone">048-471-8201</a>
+          <div class="contact-hours" style="margin-bottom: 1.2rem">受付時間　平日 8:30〜17:15</div>
+          <div style="font-weight: bold; font-size: 1rem; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 1rem; margin-bottom: 0.3rem">志木市高齢者あんしん相談センター（南部）</div>
+          <a href="tel:0484713555" class="contact-phone">048-471-3555</a>
+          <div class="contact-hours" style="margin-bottom: 1.2rem">受付時間　平日 8:30〜17:15</div>
+          <div style="font-weight: bold; font-size: 1rem; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 1rem; margin-bottom: 0.3rem">志木市高齢者あんしん相談センター（北部）</div>
+          <a href="tel:0484714165" class="contact-phone">048-471-4165</a>
+          <div class="contact-hours">受付時間　平日 8:30〜17:15</div>
+        </div>
+
+        <div class="result-actions">
+          <button class="btn-action btn-print" onclick="window.print()">結果を印刷</button>
+          <button class="btn-action btn-reset" onclick="resetQuiz()">もう一度チェックする</button>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const questions = [
+        { t: '庭の手入れや外回りの片付けを、以前より負担に感じることがある', c: 'house' },
+        { t: '家の中に、数年以上使っていない部屋や物置状態の場所がある', c: 'house' },
+        { t: 'この家を将来どうするか（譲る・売る等）について、家族との話し合いが不足している', c: 'house' },
+        { t: '家の権利証や土地の境界に関する書類が、どこにあるかすぐには分からない', c: 'house' },
+        { t: '今の家にあと何年住み続けるか、具体的なイメージが持てていない', c: 'house' },
+        { t: '近所に、ちょっとした困りごとを気軽に頼める相手がいない', c: 'isolation' },
+        { t: '家族や親戚と連絡を取り合うのは、数ヶ月に一度あるかないかだ', c: 'isolation' },
+        { t: '地域の行事や趣味の集まりなど、外出の機会が以前より減っている', c: 'isolation' },
+        { t: '1日のうち、誰とも一言も会話をしない日がよくある', c: 'isolation' },
+        { t: '体調が悪くなった時や困った時に、すぐ連絡できる相手がいない', c: 'isolation' },
+        { t: '重い買い物袋を持って歩くのが、以前より疲れやすくなった', c: 'life' },
+        { t: '部屋の段差やつまずきなど、家の作りが不便だと感じることが増えた', c: 'life' },
+        { t: 'ゴミ出しや日々の掃除など、当たり前の家事が少し面倒になり始めている', c: 'life' },
+        { t: '電球交換や簡単な修繕など、家の維持管理を後回しにしている', c: 'life' },
+        { t: '以前に比べて、家の中で過ごす時間が長くなり、外に出るのが億劫（おっくう）だ', c: 'life' },
+        { t: '以前より「疲れが取れにくい」「体が重い」と感じることが増えた', c: 'health' },
+        { t: '食事の準備が面倒で、簡単なものや同じような献立で済ませがちだ', c: 'health' },
+        { t: '以前より、物忘れやうっかりが少し増えたと感じる', c: 'health' },
+        { t: '以前は楽しかった外出や趣味に対して、以前ほど関心が持てなくなった', c: 'health' },
+        { t: '毎日飲んでいる薬の数が増えて、飲み忘れや管理に不安を感じ始めている', c: 'health' },
+        { t: '通帳の記帳や、光熱費・税金の支払い管理を少し負担に感じている', c: 'money' },
+        { t: '屋根や水回りの修理など、家の維持にかかる将来の費用が不安だ', c: 'money' },
+        { t: '将来、入院や施設入所が必要になった時の費用について、目処が立っていない', c: 'money' },
+        { t: '通帳や印鑑の保管場所を、自分以外の誰も把握していない', c: 'money' },
+        { t: '知らない電話や訪問販売など、お金のトラブルが自分にも起きそうで怖い', c: 'money' },
+        { t: '急に体調を崩した時の「第一連絡先」を、家族や周囲と共有できていない', c: 'ending' },
+        { t: '家にある荷物や家財道具の整理が、まだあまり進んでいない', c: 'ending' },
+        { t: '自分の希望（医療や介護、家の処分等）を書き残したものが、まだ何もない', c: 'ending' },
+        { t: '体力が落ちたとき、今の家に住み続けるか住み替えるかの判断を先送りにしている', c: 'ending' },
+        { t: 'これからの自分や家のことについて、気軽に相談できる専門家や知人がいない', c: 'ending' },
+      ];
+
+      const categories = {
+        house:     { label: '住宅・相続',    icon: '🏠' },
+        isolation: { label: '人間関係・孤立', icon: '🤝' },
+        life:      { label: '生活機能',      icon: '🏃' },
+        health:    { label: '健康',          icon: '💊' },
+        money:     { label: 'お金',          icon: '💴' },
+        ending:    { label: '終活',          icon: '📋' },
+      };
+
+      const riskMessages = {
+        house:     '住まいの整理や相続準備が後回しになると、家族間のトラブルや急な対応が難しくなることがあります。',
+        isolation: '人とのつながりが薄れると、体調の変化に気づいてもらいにくくなり、孤立につながりやすくなります。',
+        life:      '生活機能の低下は、気づかないうちに進みやすく、転倒や生活への支障につながることがあります。',
+        health:    '健康面のサインは、早めに対処することで、生活の質を保ちやすくなります。',
+        money:     'お金の管理や将来の費用への備えが整っていないと、急な場面での判断が難しくなることがあります。',
+        ending:    '今後の希望を伝えておく準備が整っていると、ご自身も家族も安心できます。',
+      };
+
+      const firstSteps = {
+        house:     'まずは家族と「この家のこと、いつか話し合おうか」と一言話してみましょう。',
+        isolation: 'まず、週に一度、誰かに電話や声かけをする機会をつくってみましょう。',
+        life:      '家の中で「ちょっと不便だな」と思う場所を一つ書き出してみましょう。',
+        health:    'かかりつけ医に、最近気になる体の変化を一つ伝えてみましょう。',
+        money:     '通帳や大切な書類の保管場所を、家族の誰か一人と確認し合いましょう。',
+        ending:    '「もしもの時の連絡先」を紙に書いて、見える場所に貼っておきましょう。',
+      };
+
+      let currentIndex = 0;
+      let answers = new Array(30).fill(null);
+
+      const els = {
+        header:       document.getElementById('app-header'),
+        quizScreen:   document.getElementById('quiz-screen'),
+        resultScreen: document.getElementById('result-screen'),
+        qText:        document.getElementById('q-text'),
+        qBadge:       document.getElementById('q-badge'),
+        progress:     document.getElementById('progress-bar'),
+        currentQ:     document.getElementById('current-q'),
+        btnPrev:      document.getElementById('btn-prev'),
+      };
+
+      function init() {
+        currentIndex = 0;
+        answers.fill(null);
+        els.quizScreen.classList.remove('hidden');
+        els.resultScreen.classList.add('hidden');
+        els.header.style.display = 'block';
+        renderQuestion();
+      }
+
+      function renderQuestion() {
+        const q   = questions[currentIndex];
+        const cat = categories[q.c];
+        els.quizScreen.classList.remove('fade-enter-active');
+        els.quizScreen.classList.add('fade-enter');
+        setTimeout(() => {
+          els.qText.innerText    = q.t;
+          els.qBadge.innerText   = cat.icon + ' ' + cat.label;
+          els.currentQ.innerText = currentIndex + 1;
+          els.progress.value     = currentIndex + 1;
+          els.btnPrev.disabled   = currentIndex === 0;
+          els.quizScreen.classList.remove('fade-enter');
+          els.quizScreen.classList.add('fade-enter-active');
+        }, 50);
+      }
+
+      function answer(val) {
+        answers[currentIndex] = val;
+        if (currentIndex < 29) {
+          currentIndex++;
+          renderQuestion();
+        } else {
+          showResult();
+        }
+      }
+
+      function prevQuestion() {
+        if (currentIndex > 0) {
+          currentIndex--;
+          renderQuestion();
+        }
+      }
+
+      function showResult() {
+        els.quizScreen.classList.add('hidden');
+        els.header.style.display = 'none';
+        els.resultScreen.classList.remove('hidden');
+
+        const total = answers.reduce((a, b) => a + b, 0);
+        document.getElementById('total-score').innerText = total;
+
+        const badge = document.getElementById('risk-badge');
+        const msg   = document.getElementById('risk-msg');
+
+        if (total <= 5) {
+          badge.style.backgroundColor = 'var(--risk-low)';
+          badge.innerText = '安心';
+          msg.innerText   = '今のところ、大きな変化のサインは見当たりません。';
+          msg.style.color = 'var(--risk-low)';
+        } else if (total <= 12) {
+          badge.style.backgroundColor = 'var(--risk-mid)';
+          badge.innerText = '少し気になる';
+          msg.innerText   = 'いくつか「あれ？」と感じるサインが出始めています。';
+          msg.style.color = '#b58900';
+        } else if (total <= 20) {
+          badge.style.backgroundColor = 'var(--risk-high)';
+          badge.innerText = '見直し時';
+          msg.innerText   = '複数の分野でサインが重なっています。少しずつ整理を始めませんか。';
+          msg.style.color = 'var(--risk-high)';
+        } else {
+          badge.style.backgroundColor = 'var(--risk-critical)';
+          badge.innerText = '早めに動こう';
+          msg.innerText   = '多くの分野でサインが見られます。一人で抱えずに、相談してみましょう。';
+          msg.style.color = 'var(--risk-critical)';
+        }
+
+        const breakdown = document.getElementById('cat-breakdown');
+        breakdown.innerHTML = '';
+        const catStats = {};
+        Object.keys(categories).forEach(k => { catStats[k] = { score: 0, total: 0 }; });
+        questions.forEach((q, idx) => {
+          catStats[q.c].total++;
+          if (answers[idx] === 1) catStats[q.c].score++;
+        });
+
+        let maxScore = -1;
+        let topCatKey = null;
+        Object.keys(categories).forEach(k => {
+          const s   = catStats[k];
+          const pct = s.total > 0 ? (s.score / s.total) * 100 : 0;
+          const c   = categories[k];
+          if (s.score > maxScore) { maxScore = s.score; topCatKey = k; }
+          let barColor = 'var(--risk-low)';
+          if (pct > 70)      barColor = 'var(--risk-critical)';
+          else if (pct > 40) barColor = 'var(--risk-high)';
+          else if (pct > 0)  barColor = 'var(--risk-mid)';
+          breakdown.innerHTML += `
+            <div class="cat-item">
+              <div class="cat-header">
+                <span>${c.icon} ${c.label}</span>
+                <span>${s.score} / ${s.total}</span>
+              </div>
+              <div class="cat-bar-bg">
+                <div class="cat-bar-fill" style="width:${pct}%; background-color:${barColor}"></div>
+              </div>
+            </div>`;
+        });
+
+        const contextDiv = document.getElementById('risk-context');
+        let contextHtml = '';
+        let hasRisks = false;
+        Object.keys(categories).forEach(k => {
+          if (catStats[k].score >= 2) {
+            hasRisks = true;
+            contextHtml += `<p style="margin-bottom:1rem"><strong>【${categories[k].label}】</strong><br>${riskMessages[k]}</p>`;
+          }
+        });
+        if (!hasRisks) {
+          contextHtml = '<p>現在のところ、大きな変化のサインは見られません。この状態を続けていきましょう。</p>';
+        }
+        contextDiv.innerHTML = contextHtml;
+
+        const stepDiv = document.getElementById('first-step');
+        stepDiv.innerText = (total <= 5)
+          ? '今の状態をそのまま保てるよう、無理せず続けていきましょう。'
+          : firstSteps[topCatKey];
+
+        window.scrollTo(0, 0);
+      }
+
+      function resetQuiz() {
+        if (confirm('チェック内容をリセットして最初から始めますか？')) {
+          init();
+        }
+      }
+
+      init();
+    </script>
+  </body>
+</html>
